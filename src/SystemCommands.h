@@ -6,6 +6,8 @@ struct commandStruct{
     char const *help;
 }; // Abstract Implementation of the Command Object as a C Struct
 
+
+//
 const struct commandStruct commands[] = {
     {"ver", &CmdVersion,
      "Display Firmware Version"},
@@ -20,15 +22,18 @@ const struct commandStruct commands[] = {
     {"deepSleep", &CmdDeepSleep,
      "Sets system to deepest sleep available."},
     {"run", &CmdRun,
-     "Runs the basic functionality. Exits Debug Idle Mode."},
+     "Runs the basic functionality. Exits Debug Idle Mode."}, // need to evaluate in terms of header and such
+    {"runstop", &CmdRunStop,
+     "Stops system running. Returns to Idle Mode."},
     {"",0,""} // End of Table indicator
 }; // Concrete Implementations of several Command Objects
 
-void CmdInvoker(char const*);
+void CmdInvoker(uint8_t[], uint8_t);
 void CmdVersion();
 void CmdSDTest();
 void CmdBlinkLED();
 void CmdDataCollect();
 void CmdDataFilter();
 void CmdRun();
+void CmdRunStop();
 void CmdDeepSleep();

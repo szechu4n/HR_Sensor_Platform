@@ -1,10 +1,10 @@
 #include "main.h"
 
-void CmdInvoker(char const* str){
+void CmdInvoker(uint8_t msg[], uint8_t idx){
     int i = 0;
     while(commands[i].name != "")
     {
-        if(commands[i].name == str){
+        if(commands[i].name == msg[0]){
             *commands[i].execute();
             return;
         }

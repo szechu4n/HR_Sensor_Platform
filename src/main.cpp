@@ -6,7 +6,6 @@ ErrorCode PowerOnSelfTest();
 void SleepModeIdle();
 
 int main(){
-  ErrorCode testResult;
   platform_init();
   ErrorSet(globalErrorCode,PowerOnSelfTest());
   //StartSynchronizationProcess(); // TODO: add library for this
@@ -21,7 +20,7 @@ void platform_init(){
    * Initializes platform, necessary 
    * peripherals, and prepares for POST. 
    *******************************************/ 
-  
+  CRCInit();
 
 }
 
@@ -39,5 +38,6 @@ void serialEvent(){
   while(Serial.available()){
     serialRxBuffer[i++] = Serial.read();
   }
-  
+  ErrorSet(globalErrorCode,CRCCheck(serialRxBuffer, i)); // i = len
+  CmdInvoker(serialRxBuffer, i);
 }
