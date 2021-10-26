@@ -1,5 +1,7 @@
 #include "main.h"
 
+uint8_t isRunInProgress;
+
 void CmdInvoker(uint8_t msg[], uint8_t idx){
     int i = 0;
     while(commands[i].name != "")
@@ -29,6 +31,14 @@ void CmdDataCollect(){
 
 void CmdDataFilter(){
 
+}
+
+void CmdRun(){
+
+}
+
+void CmdRunStop(){
+    
 }
 
 void CmdDeepSleep(){
