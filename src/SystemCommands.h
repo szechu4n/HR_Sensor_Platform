@@ -7,6 +7,16 @@ struct commandStruct{
 }; // Abstract Implementation of the Command Object as a C Struct
 
 
+void CmdInvoker(uint8_t[], uint8_t);
+void CmdVersion();
+void CmdSDTest();
+void CmdBlinkLED();
+void CmdDataCollect();
+void CmdDataFilter();
+void CmdRun();
+void CmdRunStop();
+void CmdDeepSleep();
+
 //
 const struct commandStruct commands[] = {
     {"ver", &CmdVersion,
@@ -28,12 +38,4 @@ const struct commandStruct commands[] = {
     {"",0,""} // End of Table indicator
 }; // Concrete Implementations of several Command Objects
 
-void CmdInvoker(uint8_t[], uint8_t);
-void CmdVersion();
-void CmdSDTest();
-void CmdBlinkLED();
-void CmdDataCollect();
-void CmdDataFilter();
-void CmdRun();
-void CmdRunStop();
-void CmdDeepSleep();
+
