@@ -6,7 +6,7 @@ void CmdInvoker(uint8_t msg[], uint8_t idx){
     int i = 0;
     while(commands[i].name != "")
     {
-        if(commands[i].name == msg[0]){
+        if(commands[i].name == msg[0]){ // reminder to do a check of the integrity of the data
             *commands[i].execute();
             return;
         }
