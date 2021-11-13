@@ -10,6 +10,7 @@ void CmdInvoker(uint8_t msg[], uint8_t idx){
             *commands[i].execute();
             return;
         }
+        i++;
     }
 }
 
