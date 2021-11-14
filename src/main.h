@@ -7,9 +7,9 @@
 #include "SystemCommands.h"
 #include "crc.h"
 
-uint8_t serialRxBuffer[1000];
+uint8_t serialRxBuffer[1000]; // may not be necessary after all
 
-enum MESSAGE_HEADER {
+enum MESSAGE_HEADER { // may need to remove
     SYNC,
     CMD,
     SAMPLE,

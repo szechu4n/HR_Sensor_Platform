@@ -4,6 +4,9 @@ void platform_init();
 ErrorCode PowerOnSelfTest();
 //void StartSynchronizationProcess();
 void SleepModeIdle();
+void ProcessSystem();
+void ReadADC();
+void WriteToSDCard();
 
 int main(){
   platform_init();
@@ -40,4 +43,10 @@ void serialEvent(){
   }
   ErrorSet(globalErrorCode,CRCCheck(serialRxBuffer, i)); // i = len
   CmdInvoker(serialRxBuffer, i);
+}
+
+void ProcessSystem(){
+  ReadADC();
+  WriteToSDCard();
+  
 }
