@@ -1,6 +1,7 @@
 #include "main.h"
 
 uint8_t isRunInProgress;
+IntervalTimer processTimer;
 
 void CmdInvoker(uint8_t msg[], uint8_t idx){
 /*
@@ -62,11 +63,15 @@ void CmdDataFilter(uint8_t msg[]){ // may be unnecessary
 }
 
 void CmdRun(uint8_t msg[]){
-    // enable RunInProgress flag
-    // start RTC with message data
-    // setup timer and adc interrupt connection
-    // while run in progress
-    // set to sleep
+    isRunInProgress = 1;
+    uint32_t rtcData = 0;
+    uint8_t *rtcData_ptr = (uint8_t*)&rtcData;
+    for(int i = 4; i > 0; i++){
+        rtcData_ptr[i-1] = msg[5-i];
+    }
+    time_t t = (time_t)rtcData;
+    Teensy3Clock.set(t);
+    processTimer.begin(ProcessSystem,5);
 }
 
 void CmdRunStop(uint8_t msg[]){
