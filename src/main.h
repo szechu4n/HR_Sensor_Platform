@@ -20,4 +20,13 @@ enum MESSAGE_HEADER { // may need to remove
     CRC_ERROR
 };
 
+void ADCInit();
+void SerialInit();
+void PlatformInit();
+ErrorCode PowerOnSelfTest();
+void SleepModeIdle();
+void ReadADC(uint16_t, uint16_t, uint16_t);
+void WriteToSDCard();
+void ProcessSystem();
+
 #endif

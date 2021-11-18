@@ -2,20 +2,9 @@
 
 const uint8_t debug = 0;
 
-void ADCInit();
-void SerialInit();
-void PlatformInit();
-ErrorCode PowerOnSelfTest();
-void SleepModeIdle();
-void ReadADC(uint16_t, uint16_t, uint16_t);
-void WriteToSDCard();
-void ProcessSystem();
-
-
 int main(){
   PlatformInit();
   ErrorSet(PowerOnSelfTest());
-  //StartSynchronizationProcess(); // TODO: add library for this
   while(1){
     SleepModeIdle();
   }
@@ -34,7 +23,7 @@ void serialEvent(){
 
 
 void ADCInit(){
-
+  
 }
 
 void SerialInit(){
@@ -70,9 +59,10 @@ void ProcessSystem(){
   if(debug)
     WriteToSDCard();
   
-  uint8_t* ecg_diff_ptr  = (uint8_t*)&ecg_diff;
+  uint8_t* ecg_diff_ptr  = (uint8_t*)&ecg_diff; // really worried about this causing seg fault lol
   uint8_t* pcg1_diff_ptr = (uint8_t*)&pcg1_diff;
   uint8_t* pcg2_diff_ptr = (uint8_t*)&pcg2_diff;
+  // add rtc stuff here
 
   uint8_t msg [7]; 
   msg[0] = 0x55;
