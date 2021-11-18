@@ -1,3 +1,6 @@
+#ifndef ERRORCODES_H
+#define ERRORCODES_H
+
 enum ErrorCode {
     NO_ERROR,
     UNKNOWN_ERROR,
@@ -8,3 +11,5 @@ enum ErrorCode {
     SD_CARD_FAIL,
     ADC_FAIL
 };
+
+#endif

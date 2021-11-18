@@ -1,7 +1,11 @@
-typedef uint16_t GlobalErrorType;
-GlobalErrorType globalErrorCode = 0;
+#ifndef ERRORCHECK_H
+#define ERRORCHECK_H
 
-void ErrorSet(GlobalErrorType&, ErrorCode); // sets errors as they occur 
-ErrorCode ErrorGet(GlobalErrorType*); // processes errors
-void ErrorPrint(GlobalErrorType*); // prints errors 
-void ErrorClear(GlobalErrorType*); // clears errors
+typedef uint16_t GlobalErrorType;
+
+void ErrorSet(ErrorCode); // sets errors as they occur 
+ErrorCode ErrorGet(); // processes errors
+void ErrorPrint(); // prints errors 
+void ErrorClear(); // clears errors
+
+#endif

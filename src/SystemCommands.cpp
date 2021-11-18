@@ -9,7 +9,7 @@ void CmdInvoker(uint8_t msg[], uint8_t idx){
     pointers to call the specific commands required.
 */
     int i = 0;
-    while(commands[i].name != "")
+    while(commands[i].header != 0)
     {
         if(commands[i].header == msg[0]){ // reminder to do a check of the integrity of the data
             commands[i].execute(msg);

@@ -1,5 +1,7 @@
 #include "main.h"
 
+crc CRCTable[256];
+
 void CRCInit(){
     crc  remainder;
     for (int dividend = 0; dividend < 256; ++dividend)
@@ -20,7 +22,7 @@ void CRCInit(){
     }
 }
 
-crc CRCFast(uint8_t const msg[], uint8_t nBytes){
+crc CRCFast(uint8_t msg[], uint8_t nBytes){
     uint8_t data;
     crc remainder = 0;
     for (int byte = 0; byte < nBytes; ++byte)
@@ -29,4 +31,8 @@ crc CRCFast(uint8_t const msg[], uint8_t nBytes){
         remainder = CRCTable[data] ^ (remainder << 8);
     }
     return (remainder);
+}
+
+ErrorCode CRCCheck(uint8_t msg[], uint8_t nBytes){
+    return NO_ERROR;
 }

@@ -1,3 +1,5 @@
+#ifndef SYSTEMCOMMANDS_H
+#define SYSTEMCOMMANDS_H
 
 typedef void(*functionPointerType)(uint8_t[]);
 struct commandStruct{
@@ -39,4 +41,4 @@ const struct commandStruct commands[] = {
     {"",0,0,""} // End of Table indicator
 }; // Concrete Implementations of several Command Objects
 
-
+#endif

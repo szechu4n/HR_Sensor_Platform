@@ -1,16 +1,20 @@
 #include "main.h"
 
-void platform_init();
+const uint8_t debug = 0;
+
+void ADCInit();
+void SerialInit();
+void PlatformInit();
 ErrorCode PowerOnSelfTest();
-//void StartSynchronizationProcess();
 void SleepModeIdle();
-void ProcessSystem();
-void ReadADC();
+void ReadADC(uint16_t, uint16_t, uint16_t);
 void WriteToSDCard();
+void ProcessSystem();
+
 
 int main(){
-  platform_init();
-  ErrorSet(globalErrorCode,PowerOnSelfTest());
+  PlatformInit();
+  ErrorSet(PowerOnSelfTest());
   //StartSynchronizationProcess(); // TODO: add library for this
   while(1){
     SleepModeIdle();
@@ -18,13 +22,37 @@ int main(){
   return 0;
 }
 
-void platform_init(){
+void serialEvent(){
+  int i = 0;
+  uint8_t serialRxBuffer[1000];
+  while(Serial.available()){
+    serialRxBuffer[i++] = Serial.read();
+  }
+  ErrorSet(CRCCheck(serialRxBuffer, i)); // i = len
+  CmdInvoker(serialRxBuffer, i);
+}
+
+
+void ADCInit(){
+
+}
+
+void SerialInit(){
+
+}
+
+void PlatformInit(){
   /********************************************
    * Initializes platform, necessary 
    * peripherals, and prepares for POST. 
    *******************************************/ 
   CRCInit();
+  ADCInit();
+  SerialInit();
+}
 
+ErrorCode PowerOnSelfTest(){
+  return NO_ERROR;
 }
 
 void SleepModeIdle(){
@@ -36,17 +64,35 @@ void SleepModeIdle(){
   sleep_disable();
 }
 
-void serialEvent(){
-  int i = 0;
-  while(Serial.available()){
-    serialRxBuffer[i++] = Serial.read();
-  }
-  ErrorSet(globalErrorCode,CRCCheck(serialRxBuffer, i)); // i = len
-  CmdInvoker(serialRxBuffer, i);
+void ProcessSystem(){
+  uint16_t ecg_diff = 0, pcg1_diff = 0, pcg2_diff = 0;
+  ReadADC(ecg_diff, pcg1_diff, pcg2_diff);
+  if(debug)
+    WriteToSDCard();
+  
+  uint8_t* ecg_diff_ptr  = (uint8_t*)&ecg_diff;
+  uint8_t* pcg1_diff_ptr = (uint8_t*)&pcg1_diff;
+  uint8_t* pcg2_diff_ptr = (uint8_t*)&pcg2_diff;
+
+  uint8_t msg [7]; 
+  msg[0] = 0x55;
+  msg[1] = ecg_diff_ptr[1];
+  msg[2] = ecg_diff_ptr[0];
+  msg[3] = pcg1_diff_ptr[1];
+  msg[4] = pcg1_diff_ptr[0];
+  msg[5] = pcg2_diff_ptr[1];
+  msg[6] = pcg2_diff_ptr[0];
+
+  crc CrcData = CRCFast(msg, 7);
+
+  Serial.print(0x55);
+  Serial.print(ecg_diff);
+  Serial.print(pcg1_diff);
+  Serial.print(pcg2_diff);
+  Serial.println(CrcData);
+  
 }
 
-void ProcessSystem(){
-  ReadADC();
-  WriteToSDCard();
-  
+void ReadADC(uint16_t ecg_diff, uint16_t pcg1_diff, uint16_t pcg2_diff){
+
 }
