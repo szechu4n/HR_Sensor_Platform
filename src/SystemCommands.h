@@ -18,7 +18,7 @@ void CmdDataCollect(uint8_t[]);
 void CmdDataFilter(uint8_t[]);
 void CmdRun(uint8_t[]);
 void CmdRunStop(uint8_t[]);
-void CmdDeepSleep(uint8_t[]);
+void CmdSync(uint8_t[]);
 
 //
 const struct commandStruct commands[] = {
@@ -30,9 +30,9 @@ const struct commandStruct commands[] = {
      "Blinks LED at desired frequency."},
     {"dataCollect", 4, &CmdDataCollect,
      "Collects unfiltered data and transmits data over serial."},
-    {"filterTest", 5, &CmdDataFilter,
-     "Collects and filters data, and transmits results over serial."},
-    {"deepSleep", 6, &CmdDeepSleep,
+    /*{"filterTest", 5, &CmdDataFilter,
+     "Collects and filters data, and transmits results over serial."},*/
+    {"sync", 6, &CmdSync,
      "Sets system to deepest sleep available."},
     {"run", 7, &CmdRun,
      "Runs the basic functionality. Exits Debug Idle Mode."}, // need to evaluate in terms of header and such

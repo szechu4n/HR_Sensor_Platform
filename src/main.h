@@ -11,6 +11,9 @@
 #include "SystemCommands.h"
 #include "crc.h"
 
+const uint8_t VER_MAJOR = 0;
+const uint8_t VER_MINOR = 1;
+
 //extern uint8_t serialRxBuffer[1000]; // may not be necessary after all
 
 enum MESSAGE_HEADER { // may need to remove
@@ -25,8 +28,9 @@ void SerialInit();
 void PlatformInit();
 ErrorCode PowerOnSelfTest();
 void SleepModeIdle();
-void ReadADC(uint16_t, uint16_t, uint16_t);
+void ReadADC(int16_t &, uint16_t &, uint16_t &, time_t &);
 void WriteToSDCard();
 void ProcessSystem();
+void WriteSerial(uint8_t[], uint8_t);
 
 #endif

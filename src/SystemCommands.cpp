@@ -24,6 +24,8 @@ void CmdVersion(uint8_t msg[]){
 /*
     Simple test to ensure software is correct version
 */
+    while(!Serial.availableForWrite());
+    
 }
 
 void CmdSDTest(uint8_t msg[]){
@@ -79,6 +81,14 @@ void CmdRunStop(uint8_t msg[]){
     // turn off timer and adc interrupt
 }
 
-void CmdDeepSleep(uint8_t msg[]){ // probably unnecessary
-
+void CmdSync(uint8_t msg[]){ // probably unnecessary
+    uint32_t rtcData = 0;
+    uint8_t *rtcData_ptr = (uint8_t*)&rtcData;
+    for(int i = 4; i > 0; i++){
+        rtcData_ptr[i-1] = msg[5-i];
+    }
+    time_t t = (time_t)rtcData;
+    time_t t_ = Teensy3Clock.get();
+    if(t_ != t)
+        Teensy3Clock.set(t);
 }
