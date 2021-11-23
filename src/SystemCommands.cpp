@@ -3,7 +3,7 @@
 uint8_t isRunInProgress;
 IntervalTimer processTimer;
 
-void CmdInvoker(uint8_t msg[], uint8_t idx){
+void CmdInvoker(uint8_t msg[]){
 /*
     CmdInvoker is a wrapper function that calls commands from
     the command table in "SystemCommands.h". It uses function
@@ -24,8 +24,12 @@ void CmdVersion(uint8_t msg[]){
 /*
     Simple test to ensure software is correct version
 */
-    while(!Serial.availableForWrite());
-    
+    uint8_t new_msg[4];
+    new_msg[0] = 1;
+    new_msg[1] = VER_MAJOR;
+    new_msg[2] = VER_MINOR;
+    new_msg[3] = CRCFast(new_msg, 3);
+    Serial.write(new_msg,4);
 }
 
 void CmdSDTest(uint8_t msg[]){

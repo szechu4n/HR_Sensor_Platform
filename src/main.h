@@ -31,6 +31,5 @@ void SleepModeIdle();
 void ReadADC(int16_t &, uint16_t &, uint16_t &, time_t &);
 void WriteToSDCard();
 void ProcessSystem();
-void WriteSerial(uint8_t[], uint8_t);
 
 #endif

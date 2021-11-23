@@ -10,7 +10,7 @@ struct commandStruct{
 }; // Abstract Implementation of the Command Object as a C Struct
 
 
-void CmdInvoker(uint8_t[], uint8_t);
+void CmdInvoker(uint8_t[]);
 void CmdVersion(uint8_t[]);
 void CmdSDTest(uint8_t[]);
 void CmdBlinkLED(uint8_t[]);
@@ -24,11 +24,11 @@ void CmdSync(uint8_t[]);
 const struct commandStruct commands[] = {
     {"ver", 1, &CmdVersion,
      "Display Firmware Version"},
-    {"sdTest", 2, &CmdSDTest,
+/*    {"sdTest", 2, &CmdSDTest,
      "Runs SD Card test, returns number of errors on completion."},
     {"blinkLed", 3, &CmdBlinkLED,
      "Blinks LED at desired frequency."},
-    {"dataCollect", 4, &CmdDataCollect,
+*/    {"dataCollect", 4, &CmdDataCollect,
      "Collects unfiltered data and transmits data over serial."},
     /*{"filterTest", 5, &CmdDataFilter,
      "Collects and filters data, and transmits results over serial."},*/

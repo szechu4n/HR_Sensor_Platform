@@ -23,7 +23,7 @@ void serialEvent(){
     serialRxBuffer[i++] = Serial.read();
   }
   ErrorSet(CRCCheck(serialRxBuffer, i)); // i = len
-  CmdInvoker(serialRxBuffer, i);
+  CmdInvoker(serialRxBuffer);
 }
 
 
@@ -81,19 +81,28 @@ void ProcessSystem(){
   uint8_t* ecg_diff_ptr  = (uint8_t*)&ecg_diff; // really worried about this causing seg fault lol
   uint8_t* pcg1_diff_ptr = (uint8_t*)&pcg1_diff;
   uint8_t* pcg2_diff_ptr = (uint8_t*)&pcg2_diff;
+  uint8_t* time_ptr = (uint8_t*)&sample_time;
   // add rtc stuff here
 
-  uint8_t msg [8]; 
+  uint8_t msg [16]; 
   msg[0] = 0x55;
-  msg[1] = ecg_diff_ptr[1];
-  msg[2] = ecg_diff_ptr[0];
-  msg[3] = pcg1_diff_ptr[1];
-  msg[4] = pcg1_diff_ptr[0];
-  msg[5] = pcg2_diff_ptr[1];
-  msg[6] = pcg2_diff_ptr[0];
-  msg[7] = CRCFast(msg, 7);
+  msg[1] = time_ptr[7];
+  msg[2] = time_ptr[6];
+  msg[3] = time_ptr[5];
+  msg[4] = time_ptr[4];
+  msg[5] = time_ptr[3];
+  msg[6] = time_ptr[2];
+  msg[7] = time_ptr[1];
+  msg[8] = time_ptr[0];
+  msg[9] = ecg_diff_ptr[1];
+  msg[10] = ecg_diff_ptr[0];
+  msg[11] = pcg1_diff_ptr[1];
+  msg[12] = pcg1_diff_ptr[0];
+  msg[13] = pcg2_diff_ptr[1];
+  msg[14] = pcg2_diff_ptr[0];
+  msg[15] = CRCFast(msg, 14);
 
-  WriteSerial(msg,8);  
+  Serial.write(msg,16);  
 }
 
 void ReadADC(int16_t &ecg_diff, uint16_t &pcg1_diff, uint16_t &pcg2_diff, uint16_t &sample_time){
@@ -108,13 +117,4 @@ void ReadADC(int16_t &ecg_diff, uint16_t &pcg1_diff, uint16_t &pcg2_diff, uint16
   prev_value_ecg = value_A9;
   pcg1_diff = value_A1;
   pcg2_diff = value_A2;
-}
-
-void WriteSerial(uint8_t msg[], uint8_t len)
-{
-  for(int i = 0; i < len-1; i++)
-  {
-    Serial.print(msg[i]);
-  }
-  Serial.println(msg[len-1]);
 }
