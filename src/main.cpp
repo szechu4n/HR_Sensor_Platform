@@ -84,23 +84,19 @@ void ProcessSystem(){
   uint8_t* time_ptr = (uint8_t*)&sample_time;
   // add rtc stuff here
 
-  uint8_t msg [16]; 
+  uint8_t msg [12]; 
   msg[0] = 0x55;
-  msg[1] = time_ptr[7];
-  msg[2] = time_ptr[6];
-  msg[3] = time_ptr[5];
-  msg[4] = time_ptr[4];
-  msg[5] = time_ptr[3];
-  msg[6] = time_ptr[2];
-  msg[7] = time_ptr[1];
-  msg[8] = time_ptr[0];
-  msg[9] = ecg_diff_ptr[1];
-  msg[10] = ecg_diff_ptr[0];
-  msg[11] = pcg1_diff_ptr[1];
-  msg[12] = pcg1_diff_ptr[0];
-  msg[13] = pcg2_diff_ptr[1];
-  msg[14] = pcg2_diff_ptr[0];
-  msg[15] = CRCFast(msg, 14);
+  msg[1] = time_ptr[3];
+  msg[2] = time_ptr[2];
+  msg[3] = time_ptr[1];
+  msg[4] = time_ptr[0];
+  msg[5] = ecg_diff_ptr[1];
+  msg[6] = ecg_diff_ptr[0];
+  msg[7] = pcg1_diff_ptr[1];
+  msg[8] = pcg1_diff_ptr[0];
+  msg[9] = pcg2_diff_ptr[1];
+  msg[10] = pcg2_diff_ptr[0];
+  msg[11] = CRCFast(msg, 14);
 
   Serial.write(msg,16);  
 }
