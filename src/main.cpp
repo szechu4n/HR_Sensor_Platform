@@ -1,31 +1,63 @@
 #include "main.h"
 
-const uint8_t debug = 0;
-
 uint8_t serialRxBuffer[1000];
 
 ADC* adc = new ADC;
+Logger* logger;
+
 const int readPin_A1 = A1;
 const int readPin_A2 = A2;
 const int readPin_A9 = A9;
+const int ledSerialPin_D7 = 7;
 
 int main(){
+  delay(5000);
   PlatformInit();
+  #if DEBUG == 1
+  logger->logEvent("System Fully Initialized");
+  #elif DEBUG == 2
+  Serial.println("System Fully Initialized");
+  logger->logEvent("System Fully Initialized");
+  #endif
   ErrorSet(PowerOnSelfTest());
   while(1){
+    if(Serial.available()){
+      int i = 0;
+      while(Serial.available()){
+        serialRxBuffer[i++] = Serial.read();
+      }
+      #if DEBUG == 1
+      logger->logEvent("Message Received");
+      logger->logEvent(serialRxBuffer, i);
+      #elif DEBUG == 2
+      Serial.println("Message Received");
+      logger->logEvent("Message Received");
+      logger->logEvent(serialRxBuffer, i);
+      #endif
+      ErrorSet(CRCCheck(serialRxBuffer, i)); // i = len
+      CmdInvoker(serialRxBuffer);
+    }
     SleepModeIdle();
   }
   return 0;
 }
 
-void serialEvent(){
+/*extern void serialEvent(){
   int i = 0;
   while(Serial.available()){
     serialRxBuffer[i++] = Serial.read();
   }
+  #if DEBUG == 1
+  logger->logEvent("Message Received");
+  logger->logEvent(serialRxBuffer, i);
+  #elif DEBUG == 2
+  Serial.println("Message Received");
+  logger->logEvent("Message Received");
+  logger->logEvent(serialRxBuffer, i);
+  #endif
   ErrorSet(CRCCheck(serialRxBuffer, i)); // i = len
   CmdInvoker(serialRxBuffer);
-}
+}*/
 
 
 void ADCInit(){
@@ -46,6 +78,8 @@ void ADCInit(){
 
 void SerialInit(){
   Serial.begin(115200);
+  pinMode(ledSerialPin_D7, OUTPUT);
+  digitalWrite(ledSerialPin_D7, HIGH);
 }
 
 void PlatformInit(){
@@ -53,9 +87,30 @@ void PlatformInit(){
    * Initializes platform, necessary 
    * peripherals, and prepares for POST. 
    *******************************************/ 
-  CRCInit();
-  ADCInit();
+  pinMode(ledErrorPin_D8, OUTPUT);
+  char filename[] = "log.txt";
+  logger = new Logger(filename);
   SerialInit();
+  #if DEBUG == 1
+  logger->logEvent("Serial Initialized");
+  #elif DEBUG == 2
+  Serial.println("Serial Initialized");
+  logger->logEvent("Serial Initialized");
+  #endif
+  CRCInit();
+  #if DEBUG == 1
+  logger->logEvent("CRC Initialized");
+  #elif DEBUG == 2
+  Serial.println("CRC Initialized");
+  logger->logEvent("CRC Initialized");
+  #endif
+  ADCInit();
+  #if DEBUG == 1
+  logger->logEvent("ADC Initialized");
+  #elif DEBUG == 2
+  Serial.println("ADC Initialized");
+  logger->logEvent("ADC Initialized");
+  #endif
 }
 
 ErrorCode PowerOnSelfTest(){
@@ -76,8 +131,6 @@ void ProcessSystem(){
   static uint16_t pcg1_diff, pcg2_diff;
   static time_t sample_time;
   ReadADC(ecg_diff, pcg1_diff, pcg2_diff, sample_time);
-  if(debug)
-    WriteToSDCard();
   
   uint8_t* ecg_diff_ptr  = (uint8_t*)&ecg_diff; // really worried about this causing seg fault lol
   uint8_t* pcg1_diff_ptr = (uint8_t*)&pcg1_diff;
@@ -98,7 +151,10 @@ void ProcessSystem(){
   msg[9] = pcg2_diff_ptr[1];
   msg[10] = pcg2_diff_ptr[0];
   msg[11] = CRCFast(msg, 14);
-
+  #if DEBUG == 1
+  logger->logEvent("Data Message Available");
+  logger->logEvent(msg,12);
+  #endif
   Serial.write(msg,16);  
 }
 

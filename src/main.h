@@ -3,16 +3,23 @@
 
 #include "Arduino.h"
 #include "SPI.h"
-#include "SD.h"
+#include "SDFat.h"
 #include "ADC.h"
 #include <avr/sleep.h>
 #include "errorCodes.h"
 #include "ErrorCheckLib.h"
 #include "SystemCommands.h"
 #include "crc.h"
+#include "logger.h"
 
-const char VER_MAJOR = 'A';
-const char VER_MINOR = 'A';
+
+#define DEBUG 2
+
+
+const char VER_MAJOR = '0';
+const char VER_MINOR = '1';
+
+const int ledErrorPin_D8 = 8;
 
 //extern uint8_t serialRxBuffer[1000]; // may not be necessary after all
 
