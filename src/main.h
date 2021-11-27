@@ -11,8 +11,8 @@
 #include "SystemCommands.h"
 #include "crc.h"
 
-const uint8_t VER_MAJOR = 0;
-const uint8_t VER_MINOR = 1;
+const char VER_MAJOR = 'A';
+const char VER_MINOR = 'A';
 
 //extern uint8_t serialRxBuffer[1000]; // may not be necessary after all
 

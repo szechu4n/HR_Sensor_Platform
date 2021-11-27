@@ -25,9 +25,9 @@ void CmdVersion(uint8_t msg[]){
     Simple test to ensure software is correct version
 */
     uint8_t new_msg[4];
-    new_msg[0] = 1;
-    new_msg[1] = VER_MAJOR;
-    new_msg[2] = VER_MINOR;
+    new_msg[0] = 66;
+    new_msg[1] = uint8_t(VER_MAJOR);
+    new_msg[2] = uint8_t(VER_MINOR);
     new_msg[3] = CRCFast(new_msg, 3);
     Serial.write(new_msg,4);
 }
