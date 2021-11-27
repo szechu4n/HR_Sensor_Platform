@@ -2,6 +2,8 @@
 
 const uint8_t debug = 0;
 
+uint8_t serialRxBuffer[1000];
+
 ADC* adc = new ADC;
 const int readPin_A1 = A1;
 const int readPin_A2 = A2;
@@ -18,7 +20,6 @@ int main(){
 
 void serialEvent(){
   int i = 0;
-  uint8_t serialRxBuffer[1000];
   while(Serial.available()){
     serialRxBuffer[i++] = Serial.read();
   }
