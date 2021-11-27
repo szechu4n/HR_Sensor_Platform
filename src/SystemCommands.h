@@ -22,7 +22,7 @@ void CmdSync(uint8_t[]);
 
 //
 const struct commandStruct commands[] = {
-    {"ver", 0x66, &CmdVersion,
+    {"ver", 0x01, &CmdVersion,
      "Display Firmware Version"},
 /*    {"sdTest", 2, &CmdSDTest,
      "Runs SD Card test, returns number of errors on completion."},
