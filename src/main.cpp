@@ -42,24 +42,6 @@ int main(){
   return 0;
 }
 
-/*extern void serialEvent(){
-  int i = 0;
-  while(Serial.available()){
-    serialRxBuffer[i++] = Serial.read();
-  }
-  #if DEBUG == 1
-  logger->logEvent("Message Received");
-  logger->logEvent(serialRxBuffer, i);
-  #elif DEBUG == 2
-  Serial.println("Message Received");
-  logger->logEvent("Message Received");
-  logger->logEvent(serialRxBuffer, i);
-  #endif
-  ErrorSet(CRCCheck(serialRxBuffer, i)); // i = len
-  CmdInvoker(serialRxBuffer);
-}*/
-
-
 void ADCInit(){
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(readPin_A1, INPUT);
@@ -150,7 +132,7 @@ void ProcessSystem(){
   msg[8] = pcg1_diff_ptr[0];
   msg[9] = pcg2_diff_ptr[1];
   msg[10] = pcg2_diff_ptr[0];
-  msg[11] = CRCFast(msg, 14);
+  msg[11] = CRCFast(msg, 11);
   #if DEBUG == 1
   logger->logEvent("Data Message Available");
   logger->logEvent(msg,12);
