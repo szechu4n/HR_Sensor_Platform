@@ -1,12 +1,17 @@
 #include "main.h"
 
 uint8_t serialRxBuffer[1000];
+uint8_t pwrToggle;
 
 ADC* adc = new ADC;
 Logger* logger;
 
 int main(){
-  delay(5000);
+  pinMode(buttonStartPin_D12, INPUT);
+  int buttonState = 0;
+  while(buttonState == LOW){
+    buttonState = digitalRead(buttonStartPin_D12);
+  }
   PlatformInit();
   #if DEBUG == 1
   logger->logEvent("System Fully Initialized");
@@ -16,7 +21,12 @@ int main(){
   #endif
   ErrorSet(PowerOnSelfTest());
   while(1){
-    if(Serial.available()){
+    if(pwrToggle == 0x01)
+    {
+      digitalWrite(ledSerialPin_D7, LOW);
+    }
+    else if(Serial.available()){
+      digitalWrite(ledSerialPin_D7, HIGH);
       int i = 0;
       while(Serial.available()){
         serialRxBuffer[i++] = Serial.read();
@@ -31,6 +41,9 @@ int main(){
       #endif
       ErrorSet(CRCCheck(serialRxBuffer, i)); // i = len
       CmdInvoker(serialRxBuffer);
+    }
+    else{
+      digitalWrite(ledSerialPin_D7, HIGH);
     }
     SleepModeIdle();
   }
@@ -59,6 +72,11 @@ void SerialInit(){
   digitalWrite(ledSerialPin_D7, HIGH);
 }
 
+void ButtonInit(){
+  attachInterrupt(buttonStartPin_D12, ButtonInterrupt, RISING);
+  pwrToggle = 0;
+}
+
 void PlatformInit(){
   /********************************************
    * Initializes platform, necessary 
@@ -73,6 +91,13 @@ void PlatformInit(){
   #elif DEBUG == 2
   Serial.println("Serial Initialized");
   logger->logEvent("Serial Initialized");
+  #endif
+  ButtonInit();
+  #if DEBUG == 1
+  logger->logEvent("Button Initialized");
+  #elif DEBUG == 2
+  Serial.println("Button Initialized");
+  logger->logEvent("Button Initialized");
   #endif
   CRCInit();
   #if DEBUG == 1
@@ -147,4 +172,8 @@ void ReadADC(int16_t &ecg_diff, uint16_t &pcg1_diff, uint16_t &pcg2_diff, uint16
   prev_value_ecg = value_A9;
   pcg1_diff = value_A1;
   pcg2_diff = value_A2;
+}
+
+void ButtonInterrupt(){
+  pwrToggle ^= 0x01;
 }

@@ -12,15 +12,15 @@
 #include "crc.h"
 #include "logger.h"
 
-
 #define DEBUG 2
-
 
 const char VER_MAJOR = '0';
 const char VER_MINOR = '1';
+const char VER_DEBUG = '2';
 
 const int ledErrorPin_D8 = 8;
 const int ledSerialPin_D7 = 7;
+const int buttonStartPin_D12 = 12;
 
 const int readPin_A1 = A1;
 const int readPin_A2 = A2;
@@ -38,10 +38,12 @@ enum MESSAGE_HEADER { // may need to remove
 void ADCInit();
 void SerialInit();
 void PlatformInit();
+void ButtonInit();
 ErrorCode PowerOnSelfTest();
 void SleepModeIdle();
 void ReadADC(int16_t &, uint16_t &, uint16_t &, time_t &);
 void WriteToSDCard();
 void ProcessSystem();
+void ButtonInterrupt();
 
 #endif

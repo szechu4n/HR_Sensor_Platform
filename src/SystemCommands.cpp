@@ -24,11 +24,16 @@ void CmdVersion(uint8_t msg[]){
 /*
     Simple test to ensure software is correct version
 */
-    uint8_t new_msg[4];
+    if(isRunInProgress)
+    {
+        return;
+    }
+    uint8_t new_msg[5];
     new_msg[0] = 0x61;
     new_msg[1] = uint8_t(VER_MAJOR);
     new_msg[2] = uint8_t(VER_MINOR);
-    new_msg[3] = CRCFast(new_msg, 3);
+    new_msg[3] = uint8_t(VER_DEBUG);
+    new_msg[4] = CRCFast(new_msg, 4);
     Serial.write(new_msg,4);
 }
 
@@ -39,6 +44,10 @@ void CmdSDTest(uint8_t msg[]){
 }
 
 void CmdBlinkLED(uint8_t msg[]){
+    if(isRunInProgress)
+    {
+        return;
+    }
     digitalWrite(ledSerialPin_D7, LOW);
     delay(250);
     digitalWrite(ledSerialPin_D7, HIGH);
