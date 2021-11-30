@@ -5,11 +5,6 @@ uint8_t serialRxBuffer[1000];
 ADC* adc = new ADC;
 Logger* logger;
 
-const int readPin_A1 = A1;
-const int readPin_A2 = A2;
-const int readPin_A9 = A9;
-const int ledSerialPin_D7 = 7;
-
 int main(){
   delay(5000);
   PlatformInit();

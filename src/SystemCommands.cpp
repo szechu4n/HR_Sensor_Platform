@@ -39,10 +39,9 @@ void CmdSDTest(uint8_t msg[]){
 }
 
 void CmdBlinkLED(uint8_t msg[]){
-/*
-    Simple test to ensure system works
-*/
-
+    digitalWrite(ledSerialPin_D7, LOW);
+    delay(250);
+    digitalWrite(ledSerialPin_D7, HIGH);
 }
 
 void CmdDataCollect(uint8_t msg[]){
@@ -77,10 +76,12 @@ void CmdRun(uint8_t msg[]){
     }
     time_t t = (time_t)rtcData;
     Teensy3Clock.set(t);
-    processTimer.begin(ProcessSystem,5);
+    processTimer.begin(ProcessSystem,1000);
 }
 
 void CmdRunStop(uint8_t msg[]){
+    isRunInProgress = 0;
+    processTimer.end();
     // disable RunInProgress flag
     // turn off timer and adc interrupt
 }

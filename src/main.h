@@ -20,6 +20,11 @@ const char VER_MAJOR = '0';
 const char VER_MINOR = '1';
 
 const int ledErrorPin_D8 = 8;
+const int ledSerialPin_D7 = 7;
+
+const int readPin_A1 = A1;
+const int readPin_A2 = A2;
+const int readPin_A9 = A9;
 
 //extern uint8_t serialRxBuffer[1000]; // may not be necessary after all
 
