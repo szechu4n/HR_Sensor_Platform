@@ -1,6 +1,6 @@
 #include "main.h"
 
-uint8_t serialRxBuffer[1000];
+uint8_t serialMsg[6];
 uint8_t pwrToggle;
 
 ADC* adc = new ADC;
@@ -29,26 +29,32 @@ int main(){
       digitalWrite(ledSerialPin_D7, HIGH);
       int i = 0;
       while(Serial.available()){
-        serialRxBuffer[i++] = Serial.read();
+        for(int i = 0; i < 6; i++)
+        {
+          serialMsg[i++] = Serial.read();
+        }
         #if DEBUG == 2
-        logger->logEvent(serialRxBuffer,i);
+        logger->logEvent(serialMsg,i);
         #endif
+        CmdInvoker(serialMsg);
       }
       #if DEBUG == 1
       logger->logEvent("Message Received");
-      logger->logEvent(serialRxBuffer, i);
+      logger->logEvent(serialMsg, i);
       #elif DEBUG == 2
       Serial.println("Message Received");
       logger->logEvent("Message Received");
-      logger->logEvent(serialRxBuffer, i);
+      logger->logEvent(serialMsg, i);
       #endif
-      ErrorSet(CRCCheck(serialRxBuffer, i)); // i = len
-      CmdInvoker(serialRxBuffer);
+      // ErrorSet(CRCCheck(serialMsg, i)); // i = len
+      // CmdInvoker(serialMsg);
     }
     else{
       digitalWrite(ledSerialPin_D7, HIGH);
     }
+    #if DEBUG == 2
     Serial.println("Going to sleep mode");
+    #endif
     SleepModeIdle();
   }
   return 0;
@@ -134,41 +140,54 @@ void SleepModeIdle(){
 
 void ProcessSystem(){
   static int16_t ecg_diff;
-  static uint16_t pcg1_diff, pcg2_diff;
+  static uint16_t pcg_sample;
   static time_t sample_time;
-  ReadADC(ecg_diff, pcg1_diff, pcg2_diff, sample_time);
+  ReadADC(ecg_diff, pcg_sample, sample_time);
   
   #if DEBUG == 2
   logger->logEvent("Data Sampled");
   #endif
 
-  uint8_t* ecg_diff_ptr  = (uint8_t*)&ecg_diff; // really worried about this causing seg fault lol
-  uint8_t* pcg1_diff_ptr = (uint8_t*)&pcg1_diff;
-  uint8_t* pcg2_diff_ptr = (uint8_t*)&pcg2_diff;
-  uint8_t* time_ptr = (uint8_t*)&sample_time;
+  // uint8_t ecg[]  = (uint8_t*)&ecg_diff; 
+  // uint8_t pcg1[] = (uint8_t*)&pcg1_diff;
+  // uint8_t pcg2[] = (uint8_t*)&pcg2_diff;
+  // uint8_t time[] = (uint8_t*)&sample_time;
+  uint8_t ecg[2];
+  uint8_t pcg[2];
+  uint8_t time[4];
+
+  ecg[0] = ecg_diff & 255;
+  ecg[1] = (ecg_diff >> 8) & 255;
+
+  pcg[0] = pcg_sample & 255;
+  pcg[1] = (pcg_sample >> 8) & 255;
+
+  time[0] = sample_time & 255;
+  time[1] = (sample_time >> 8) & 255;
+  time[2] = (sample_time >> 16) & 255;
+  time[3] = (sample_time >> 24) & 255;
+  
   // add rtc stuff here
 
-  uint8_t msg [12]; 
+  uint8_t msg [10]; 
   msg[0] = 0x55;
-  msg[1] = time_ptr[3];
-  msg[2] = time_ptr[2];
-  msg[3] = time_ptr[1];
-  msg[4] = time_ptr[0];
-  msg[5] = ecg_diff_ptr[1];
-  msg[6] = ecg_diff_ptr[0];
-  msg[7] = pcg1_diff_ptr[1];
-  msg[8] = pcg1_diff_ptr[0];
-  msg[9] = pcg2_diff_ptr[1];
-  msg[10] = pcg2_diff_ptr[0];
-  msg[11] = CRCFast(msg, 11);
+  msg[1] = time[3];
+  msg[2] = time[2];
+  msg[3] = time[1];
+  msg[4] = time[0];
+  msg[5] = ecg[1];
+  msg[6] = ecg[0];
+  msg[7] = pcg[1];
+  msg[8] = pcg[0];
+  msg[9] = CRCFast(msg, 9);
   #if DEBUG == 2
   logger->logEvent("Data Message Available");
-  logger->logEvent(msg,12);
+  logger->logEvent(msg,10);
   #endif
-  Serial.write(msg,12);  
+  Serial.write(msg,10);
 }
 
-void ReadADC(int16_t &ecg_diff, uint16_t &pcg1_diff, uint16_t &pcg2_diff, uint16_t &sample_time){
+void ReadADC(int16_t &ecg_diff, uint16_t &pcg, time_t &sample_time){
   static uint16_t prev_value_ecg = 0;
   sample_time = Teensy3Clock.get();
   uint16_t value_A9 = adc->adc1->analogRead(readPin_A9);
@@ -176,8 +195,7 @@ void ReadADC(int16_t &ecg_diff, uint16_t &pcg1_diff, uint16_t &pcg2_diff, uint16
   uint16_t value_A2 = adc->adc1->analogRead(readPin_A2);
   ecg_diff = value_A9 - prev_value_ecg;
   prev_value_ecg = value_A9;
-  pcg1_diff = value_A1;
-  pcg2_diff = value_A2;
+  pcg = (value_A1 + value_A2)/2;
 }
 
 void ButtonInterrupt(){

@@ -12,11 +12,11 @@
 #include "crc.h"
 #include "logger.h"
 
-#define DEBUG 2
+#define DEBUG 1
 
 const char VER_MAJOR = '0';
 const char VER_MINOR = '1';
-const char VER_DEBUG = '2';
+const char VER_DEBUG = '1';
 
 const int ledErrorPin_D8 = 8;
 const int ledSerialPin_D7 = 7;
@@ -41,7 +41,7 @@ void PlatformInit();
 void ButtonInit();
 ErrorCode PowerOnSelfTest();
 void SleepModeIdle();
-void ReadADC(int16_t &, uint16_t &, uint16_t &, time_t &);
+void ReadADC(int16_t &, uint16_t &, time_t &);
 void WriteToSDCard();
 void ProcessSystem();
 void ButtonInterrupt();

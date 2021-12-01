@@ -79,9 +79,9 @@ void CmdDataFilter(uint8_t msg[]){ // may be unnecessary
 void CmdRun(uint8_t msg[]){
     isRunInProgress = 1;
     uint32_t rtcData = 0;
-    uint8_t *rtcData_ptr = (uint8_t*)&rtcData;
-    for(int i = 4; i > 0; i++){
-        rtcData_ptr[i-1] = msg[5-i];
+    //uint8_t rtc[4] = (uint8_t*)&rtcData;
+    for(int i = 0; i < 4; i++){
+        rtcData = (msg[i+1] >> 8*i);
     }
     time_t t = (time_t)rtcData;
     Teensy3Clock.set(t);
@@ -97,9 +97,9 @@ void CmdRunStop(uint8_t msg[]){
 
 void CmdSync(uint8_t msg[]){ // probably unnecessary
     uint32_t rtcData = 0;
-    uint8_t *rtcData_ptr = (uint8_t*)&rtcData;
-    for(int i = 4; i > 0; i++){
-        rtcData_ptr[i-1] = msg[5-i];
+    //uint8_t *rtcData_ptr = (uint8_t*)&rtcData;
+    for(int i = 0; i < 4; i++){
+        rtcData = (msg[i+1] >> 8*i);
     }
     time_t t = (time_t)rtcData;
     time_t t_ = Teensy3Clock.get();
