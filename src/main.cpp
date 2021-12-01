@@ -15,9 +15,9 @@ int main(){
   PlatformInit();
   #if DEBUG == 1
   logger->logEvent("System Fully Initialized");
-  #elif DEBUG == 2
-  Serial.println("System Fully Initialized");
-  logger->logEvent("System Fully Initialized");
+  // #elif DEBUG == 2
+  // Serial.println("System Fully Initialized");
+  // logger->logEvent("System Fully Initialized");
   #endif
   ErrorSet(PowerOnSelfTest());
   while(1){
@@ -41,10 +41,10 @@ int main(){
       #if DEBUG == 1
       logger->logEvent("Message Received");
       logger->logEvent(serialMsg, i);
-      #elif DEBUG == 2
-      Serial.println("Message Received");
-      logger->logEvent("Message Received");
-      logger->logEvent(serialMsg, i);
+      // #elif DEBUG == 2
+      // Serial.println("Message Received");
+      // logger->logEvent("Message Received");
+      // logger->logEvent(serialMsg, i);
       #endif
       // ErrorSet(CRCCheck(serialMsg, i)); // i = len
       // CmdInvoker(serialMsg);
@@ -52,9 +52,9 @@ int main(){
     else{
       digitalWrite(ledSerialPin_D7, HIGH);
     }
-    #if DEBUG == 2
-    Serial.println("Going to sleep mode");
-    #endif
+    // #if DEBUG == 2
+    // Serial.println("Going to sleep mode");
+    // #endif
     SleepModeIdle();
   }
   return 0;
@@ -144,14 +144,10 @@ void ProcessSystem(){
   static time_t sample_time;
   ReadADC(ecg_diff, pcg_sample, sample_time);
   
-  #if DEBUG == 2
+  #if DEBUG == 1
   logger->logEvent("Data Sampled");
   #endif
-
-  // uint8_t ecg[]  = (uint8_t*)&ecg_diff; 
-  // uint8_t pcg1[] = (uint8_t*)&pcg1_diff;
-  // uint8_t pcg2[] = (uint8_t*)&pcg2_diff;
-  // uint8_t time[] = (uint8_t*)&sample_time;
+  
   uint8_t ecg[2];
   uint8_t pcg[2];
   uint8_t time[4];
@@ -180,7 +176,7 @@ void ProcessSystem(){
   msg[7] = pcg[1];
   msg[8] = pcg[0];
   msg[9] = CRCFast(msg, 9);
-  #if DEBUG == 2
+  #if DEBUG == 1
   logger->logEvent("Data Message Available");
   logger->logEvent(msg,10);
   #endif
