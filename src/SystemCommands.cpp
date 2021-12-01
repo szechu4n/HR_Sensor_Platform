@@ -85,7 +85,7 @@ void CmdRun(uint8_t msg[]){
     }
     time_t t = (time_t)rtcData;
     Teensy3Clock.set(t);
-    processTimer.begin(ProcessSystem,1000);
+    processTimer.begin(ProcessSystem,5000);
 }
 
 void CmdRunStop(uint8_t msg[]){

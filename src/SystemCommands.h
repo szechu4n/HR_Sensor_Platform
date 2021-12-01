@@ -32,11 +32,11 @@ const struct commandStruct commands[] = {
      "Collects unfiltered data and transmits data over serial."},
     /*{"filterTest", 5, &CmdDataFilter,
      "Collects and filters data, and transmits results over serial."},*/
-    {"sync", 6, &CmdSync,
+    {"sync", 0x65, &CmdSync,
      "Sets system to deepest sleep available."},
-    {"run", 7, &CmdRun,
+    {"run", 0x71, &CmdRun,
      "Runs the basic functionality. Exits Debug Idle Mode."}, // need to evaluate in terms of header and such
-    {"runstop", 8, &CmdRunStop,
+    {"runstop", 0x81, &CmdRunStop,
      "Stops system running. Returns to Idle Mode."},
     {"",0,0,""} // End of Table indicator
 }; // Concrete Implementations of several Command Objects

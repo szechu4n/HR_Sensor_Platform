@@ -30,6 +30,9 @@ int main(){
       int i = 0;
       while(Serial.available()){
         serialRxBuffer[i++] = Serial.read();
+        #if DEBUG == 2
+        logger->logEvent(serialRxBuffer,i);
+        #endif
       }
       #if DEBUG == 1
       logger->logEvent("Message Received");
@@ -45,6 +48,7 @@ int main(){
     else{
       digitalWrite(ledSerialPin_D7, HIGH);
     }
+    Serial.println("Going to sleep mode");
     SleepModeIdle();
   }
   return 0;
@@ -57,12 +61,12 @@ void ADCInit(){
 
   adc->adc0->setAveraging(16);
   adc->adc0->setResolution(16);
-  adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::VERY_LOW_SPEED);
+  adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::MED_SPEED);
   adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::MED_SPEED);
 
   adc->adc1->setAveraging(16);
   adc->adc1->setResolution(16);
-  adc->adc1->setConversionSpeed(ADC_CONVERSION_SPEED::VERY_LOW_SPEED);
+  adc->adc1->setConversionSpeed(ADC_CONVERSION_SPEED::MED_SPEED);
   adc->adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::MED_SPEED);
 }
 
@@ -134,6 +138,10 @@ void ProcessSystem(){
   static time_t sample_time;
   ReadADC(ecg_diff, pcg1_diff, pcg2_diff, sample_time);
   
+  #if DEBUG == 2
+  logger->logEvent("Data Sampled");
+  #endif
+
   uint8_t* ecg_diff_ptr  = (uint8_t*)&ecg_diff; // really worried about this causing seg fault lol
   uint8_t* pcg1_diff_ptr = (uint8_t*)&pcg1_diff;
   uint8_t* pcg2_diff_ptr = (uint8_t*)&pcg2_diff;
@@ -153,21 +161,19 @@ void ProcessSystem(){
   msg[9] = pcg2_diff_ptr[1];
   msg[10] = pcg2_diff_ptr[0];
   msg[11] = CRCFast(msg, 11);
-  #if DEBUG == 1
+  #if DEBUG == 2
   logger->logEvent("Data Message Available");
   logger->logEvent(msg,12);
   #endif
-  Serial.write(msg,16);  
+  Serial.write(msg,12);  
 }
 
 void ReadADC(int16_t &ecg_diff, uint16_t &pcg1_diff, uint16_t &pcg2_diff, uint16_t &sample_time){
   static uint16_t prev_value_ecg = 0;
-  noInterrupts();
   sample_time = Teensy3Clock.get();
   uint16_t value_A9 = adc->adc1->analogRead(readPin_A9);
   uint16_t value_A1 = adc->adc0->analogRead(readPin_A1);
   uint16_t value_A2 = adc->adc1->analogRead(readPin_A2);
-  interrupts();
   ecg_diff = value_A9 - prev_value_ecg;
   prev_value_ecg = value_A9;
   pcg1_diff = value_A1;
@@ -176,4 +182,7 @@ void ReadADC(int16_t &ecg_diff, uint16_t &pcg1_diff, uint16_t &pcg2_diff, uint16
 
 void ButtonInterrupt(){
   pwrToggle ^= 0x01;
+  #if DEBUG == 2
+  logger->logEvent("Forced Power Mode Change");
+  #endif
 }
