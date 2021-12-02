@@ -41,7 +41,7 @@ void PlatformInit();
 void ButtonInit();
 ErrorCode PowerOnSelfTest();
 void SleepModeIdle();
-void ReadADC(int16_t &, uint16_t &, time_t &);
+void ReadADC(int_fast16_t &, uint_fast16_t &, time_t &);
 void WriteToSDCard();
 void ProcessSystem();
 void ButtonInterrupt();

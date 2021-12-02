@@ -27,9 +27,8 @@ int main(){
     }
     else if(Serial.available()){
       digitalWrite(ledSerialPin_D7, HIGH);
-      int i = 0;
       while(Serial.available()){
-        for(int i = 0; i < 6; i++)
+        for(int_fast16_t i = 0; i < 6; i++)
         {
           serialMsg[i++] = Serial.read();
         }
@@ -39,8 +38,8 @@ int main(){
         CmdInvoker(serialMsg);
       }
       #if DEBUG == 1
-      logger->logEvent("Message Received");
-      logger->logEvent(serialMsg, i);
+      //logger->logEvent("Message Received");
+      //logger->logEvent(serialMsg, i);
       // #elif DEBUG == 2
       // Serial.println("Message Received");
       // logger->logEvent("Message Received");
@@ -68,12 +67,12 @@ void ADCInit(){
   adc->adc0->setAveraging(16);
   adc->adc0->setResolution(16);
   adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::MED_SPEED);
-  adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::MED_SPEED);
+  adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);
 
   adc->adc1->setAveraging(16);
   adc->adc1->setResolution(16);
   adc->adc1->setConversionSpeed(ADC_CONVERSION_SPEED::MED_SPEED);
-  adc->adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::MED_SPEED);
+  adc->adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);
 }
 
 void SerialInit(){
@@ -139,24 +138,24 @@ void SleepModeIdle(){
 }
 
 void ProcessSystem(){
-  static int16_t ecg_diff;
-  static uint16_t pcg_sample;
-  static time_t sample_time;
-  ReadADC(ecg_diff, pcg_sample, sample_time);
+  int_fast16_t ecg_diff;
+  uint_fast16_t pcg_diff;
+  time_t sample_time;
+  ReadADC(ecg_diff, pcg_diff, sample_time);
   
   #if DEBUG == 1
   logger->logEvent("Data Sampled");
   #endif
   
-  uint8_t ecg[2];
-  uint8_t pcg[2];
-  uint8_t time[4];
+  uint_fast8_t ecg[2];
+  uint_fast8_t pcg[2];
+  uint_fast8_t time[4];
 
   ecg[0] = ecg_diff & 255;
   ecg[1] = (ecg_diff >> 8) & 255;
 
-  pcg[0] = pcg_sample & 255;
-  pcg[1] = (pcg_sample >> 8) & 255;
+  pcg[0] = pcg_diff & 255;
+  pcg[1] = (pcg_diff >> 8) & 255;
 
   time[0] = sample_time & 255;
   time[1] = (sample_time >> 8) & 255;
@@ -176,22 +175,24 @@ void ProcessSystem(){
   msg[7] = pcg[1];
   msg[8] = pcg[0];
   msg[9] = CRCFast(msg, 9);
-  #if DEBUG == 1
-  logger->logEvent("Data Message Available");
-  logger->logEvent(msg,10);
-  #endif
+
+  //logger->logEvent("Data Message Available");
+  //logger->logEvent(msg,10);
+
   Serial.write(msg,10);
 }
 
-void ReadADC(int16_t &ecg_diff, uint16_t &pcg, time_t &sample_time){
-  static uint16_t prev_value_ecg = 0;
+void ReadADC(int_fast16_t &ecg_diff, uint_fast16_t &pcg_diff, time_t &sample_time){
+  static int_fast16_t prev_value_ecg = 0;
+  static int_fast16_t prev_value_pcg = 0;
   sample_time = Teensy3Clock.get();
-  uint16_t value_A9 = adc->adc1->analogRead(readPin_A9);
-  uint16_t value_A1 = adc->adc0->analogRead(readPin_A1);
-  uint16_t value_A2 = adc->adc1->analogRead(readPin_A2);
+  int_fast16_t value_A9 = adc->adc1->analogRead(readPin_A9);
+  int_fast16_t value_A1 = adc->adc0->analogRead(readPin_A1);
+  //uint16_t value_A2 = adc->adc1->analogRead(readPin_A2);
   ecg_diff = value_A9 - prev_value_ecg;
   prev_value_ecg = value_A9;
-  pcg = (value_A1 + value_A2)/2;
+  pcg_diff = value_A1 - prev_value_pcg;
+  prev_value_pcg = value_A1;
 }
 
 void ButtonInterrupt(){
