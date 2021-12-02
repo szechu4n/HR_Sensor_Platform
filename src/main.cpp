@@ -2,6 +2,7 @@
 
 uint8_t serialMsg[6];
 uint8_t pwrToggle;
+byte ledToggle = 0;
 
 ADC* adc = new ADC;
 Logger* logger;
@@ -21,59 +22,42 @@ int main(){
   #endif
   ErrorSet(PowerOnSelfTest());
   while(1){
-    if(pwrToggle == 0x01)
-    {
-      digitalWrite(ledSerialPin_D7, LOW);
-    }
-    else if(Serial.available()){
-      digitalWrite(ledSerialPin_D7, HIGH);
+    if(Serial.available()){
       while(Serial.available()){
-        for(int_fast16_t i = 0; i < 6; i++)
+        int i = 0;
+        for(i = 0; i < 6; i++)
         {
           serialMsg[i++] = Serial.read();
         }
-        #if DEBUG == 2
         logger->logEvent(serialMsg,i);
-        #endif
         CmdInvoker(serialMsg);
       }
-      #if DEBUG == 1
-      //logger->logEvent("Message Received");
-      //logger->logEvent(serialMsg, i);
-      // #elif DEBUG == 2
-      // Serial.println("Message Received");
-      // logger->logEvent("Message Received");
-      // logger->logEvent(serialMsg, i);
-      #endif
-      // ErrorSet(CRCCheck(serialMsg, i)); // i = len
-      // CmdInvoker(serialMsg);
     }
     else{
       digitalWrite(ledSerialPin_D7, HIGH);
     }
-    // #if DEBUG == 2
-    // Serial.println("Going to sleep mode");
-    // #endif
-    SleepModeIdle();
+    //SleepModeIdle();
   }
   return 0;
 }
 
 void ADCInit(){
-  pinMode(LED_BUILTIN, OUTPUT);
   pinMode(readPin_A1, INPUT);
-  pinMode(readPin_A2, INPUT);
+  pinMode(readPin_A9, INPUT);
 
-  adc->adc0->setAveraging(16);
+  adc->adc0->setAveraging(0);
   adc->adc0->setResolution(16);
-  adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::MED_SPEED);
+  adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS);
   adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);
+  //adc->adc0->enableInterrupts(adc0_isr);
 
-  adc->adc1->setAveraging(16);
+  adc->adc1->setAveraging(0);
   adc->adc1->setResolution(16);
-  adc->adc1->setConversionSpeed(ADC_CONVERSION_SPEED::MED_SPEED);
+  adc->adc1->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS);
   adc->adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);
+  //adc->adc1->enableInterrupts(adc1_isr);
 }
+
 
 void SerialInit(){
   Serial.begin(115200);
@@ -141,6 +125,8 @@ void ProcessSystem(){
   int_fast16_t ecg_diff;
   uint_fast16_t pcg_diff;
   time_t sample_time;
+  ledToggle ^=1;
+  digitalWriteFast(ledErrorPin_D8,ledToggle);
   ReadADC(ecg_diff, pcg_diff, sample_time);
   
   #if DEBUG == 1
@@ -180,6 +166,36 @@ void ProcessSystem(){
   //logger->logEvent(msg,10);
 
   Serial.write(msg,10);
+}
+
+void ProcessSystemFast(){
+  int_fast16_t ecg_diff;
+  uint_fast16_t pcg_diff;
+  
+  static int_fast16_t prev_value_ecg = 0;
+  static int_fast16_t prev_value_pcg = 0;
+  int_fast16_t value_A9 = adc->adc1->analogRead(readPin_A9);
+  int_fast16_t value_A1 = adc->adc0->analogRead(readPin_A1);
+  //uint16_t value_A2 = adc->adc1->analogRead(readPin_A2);
+  ecg_diff = value_A9 - prev_value_ecg;
+  prev_value_ecg = value_A9;
+  pcg_diff = value_A1 - prev_value_pcg;
+  prev_value_pcg = value_A1;
+  // add rtc stuff here
+
+  uint8_t msg [6]; 
+  msg[0] = 0x55;
+  msg[1] = (ecg_diff >> 8) & 255;
+  msg[2] = ecg_diff & 255;
+  msg[3] = (pcg_diff >> 8) & 255;
+  msg[4] = pcg_diff & 255;;
+  msg[5] = CRCFast(msg, 9);
+
+  //logger->logEvent("Data Message Available");
+  //logger->logEvent(msg,10);
+
+  Serial.write(msg,6);
+  Serial.flush();
 }
 
 void ReadADC(int_fast16_t &ecg_diff, uint_fast16_t &pcg_diff, time_t &sample_time){

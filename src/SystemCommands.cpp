@@ -28,17 +28,12 @@ void CmdVersion(uint8_t msg[]){
     {
         return;
     }
-    uint8_t new_msg[10];
+    uint8_t new_msg[4];
     new_msg[0] = 0x61;
     new_msg[1] = uint8_t(VER_MAJOR);
     new_msg[2] = uint8_t(VER_MINOR);
     new_msg[3] = uint8_t(VER_DEBUG);
-    new_msg[4] = CRCFast(new_msg, 4);
-    new_msg[5] = 0;
-    new_msg[6] = 0;
-    new_msg[7] = 0;
-    new_msg[8] = 0;
-    new_msg[9] = 0;
+    //new_msg[4] = CRCFast(new_msg, 4);
     Serial.write(new_msg,4);
 }
 
@@ -90,7 +85,7 @@ void CmdRun(uint8_t msg[]){
     }
     time_t t = (time_t)rtcData;
     Teensy3Clock.set(t);
-    processTimer.begin(ProcessSystem,25);
+    processTimer.begin(ProcessSystemFast,double(2000));
 }
 
 void CmdRunStop(uint8_t msg[]){
