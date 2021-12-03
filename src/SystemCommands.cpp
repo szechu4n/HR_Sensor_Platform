@@ -3,6 +3,7 @@
 uint8_t isRunInProgress;
 IntervalTimer processTimer;
 
+
 void CmdInvoker(uint8_t msg[]){
 /*
     CmdInvoker is a wrapper function that calls commands from
@@ -59,10 +60,17 @@ void CmdDataCollect(uint8_t msg[]){
     Once SD Card is full (definition of full being 30 minutes of data),
     transmits data over UART for testing. Keeps data in case filtering is desired.
 */
-    // enable RunInProgress flag
-    // start RTC with message data
-    // track start time, later compare start time with current time to see if 30 minutes is up
-    // set flag if filtering is enabled in this message
+    isRunInProgress = 1;
+    uint32_t rtcData = 0;
+    //uint8_t rtc[4] = (uint8_t*)&rtcData;
+    for(int i = 0; i < 4; i++){
+        rtcData = (msg[i+1] >> 8*i);
+    }
+    time_t t = (time_t)rtcData;
+    Teensy3Clock.set(t);
+    Serial.write("Starting Logging...");
+    Serial.flush();
+    processTimer.begin(ProcessSystemDataLogger,50);
 /*
     System takes large amount of data in SD card and filters with built in filters.
     Once filtering is done, transmits data over UART for testing. Removes data when done
@@ -85,7 +93,7 @@ void CmdRun(uint8_t msg[]){
     }
     time_t t = (time_t)rtcData;
     Teensy3Clock.set(t);
-    processTimer.begin(ProcessSystemFast,double(2000));
+    processTimer.begin(ProcessSystemFast,double(1000));
 }
 
 void CmdRunStop(uint8_t msg[]){
@@ -105,4 +113,9 @@ void CmdSync(uint8_t msg[]){ // probably unnecessary
     time_t t_ = Teensy3Clock.get();
     if(t_ != t)
         Teensy3Clock.set(t);
+}
+
+void ButtonInterrupt(){
+  processTimer.end();
+  Serial.println("Stopping logging...");
 }

@@ -1,4 +1,4 @@
-#include "main.h"
+#include "ErrorCheckLib.h"
 
 static GlobalErrorType globalErrorCode;
 

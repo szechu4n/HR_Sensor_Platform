@@ -28,7 +28,7 @@ const struct commandStruct commands[] = {
      "Runs SD Card test, returns number of errors on completion."},
     {"blinkLed", 3, &CmdBlinkLED,
      "Blinks LED at desired frequency."},
-*/    {"dataCollect", 4, &CmdDataCollect,
+*/    {"dataCollect", 0x31, &CmdDataCollect,
      "Collects unfiltered data and transmits data over serial."},
     /*{"filterTest", 5, &CmdDataFilter,
      "Collects and filters data, and transmits results over serial."},*/

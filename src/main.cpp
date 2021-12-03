@@ -6,18 +6,20 @@ byte ledToggle = 0;
 
 ADC* adc = new ADC;
 Logger* logger;
+CSVWriter csv;
+char csvfilename[] = "data.csv";
 
 int main(){
   pinMode(buttonStartPin_D12, INPUT);
-  int buttonState = 0;
-  while(buttonState == LOW){
-    buttonState = digitalRead(buttonStartPin_D12);
-  }
+  //int buttonState = 0;
+  delay(15000);
   PlatformInit();
+  csv = CSVWriter(csvfilename);
+  csv.writeLine("del_cycles,ecg_raw,pcg_raw");
   #if DEBUG == 1
   logger->logEvent("System Fully Initialized");
   // #elif DEBUG == 2
-  // Serial.println("System Fully Initialized");
+  Serial.println("System Fully Initialized");
   // logger->logEvent("System Fully Initialized");
   #endif
   ErrorSet(PowerOnSelfTest());
@@ -45,24 +47,28 @@ void ADCInit(){
   pinMode(readPin_A1, INPUT);
   pinMode(readPin_A9, INPUT);
 
-  adc->adc0->setAveraging(0);
+  adc->adc0->setAveraging(4);
   adc->adc0->setResolution(16);
   adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS);
   adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);
   //adc->adc0->enableInterrupts(adc0_isr);
 
-  adc->adc1->setAveraging(0);
+  adc->adc1->setAveraging(4);
   adc->adc1->setResolution(16);
   adc->adc1->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS);
   adc->adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED);
+
+  //adc->startSynchronizedSingleRead(readPin_A9, readPin_A1);
+  ARM_DEMCR |= ARM_DEMCR_TRCENA;
+  ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
   //adc->adc1->enableInterrupts(adc1_isr);
 }
 
 
 void SerialInit(){
   Serial.begin(115200);
-  pinMode(ledSerialPin_D7, OUTPUT);
-  digitalWrite(ledSerialPin_D7, HIGH);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void ButtonInit(){
@@ -170,25 +176,25 @@ void ProcessSystem(){
 
 void ProcessSystemFast(){
   int_fast16_t ecg_diff;
-  uint_fast16_t pcg_diff;
+  uint_fast16_t pcg;
   
   static int_fast16_t prev_value_ecg = 0;
-  static int_fast16_t prev_value_pcg = 0;
+  //static int_fast16_t prev_value_pcg = 0;
   int_fast16_t value_A9 = adc->adc1->analogRead(readPin_A9);
   int_fast16_t value_A1 = adc->adc0->analogRead(readPin_A1);
   //uint16_t value_A2 = adc->adc1->analogRead(readPin_A2);
   ecg_diff = value_A9 - prev_value_ecg;
   prev_value_ecg = value_A9;
-  pcg_diff = value_A1 - prev_value_pcg;
-  prev_value_pcg = value_A1;
+  pcg = value_A1;
+  //prev_value_pcg = value_A1;
   // add rtc stuff here
 
   uint8_t msg [6]; 
   msg[0] = 0x55;
   msg[1] = (ecg_diff >> 8) & 255;
   msg[2] = ecg_diff & 255;
-  msg[3] = (pcg_diff >> 8) & 255;
-  msg[4] = pcg_diff & 255;;
+  msg[3] = (pcg >> 8) & 255;
+  msg[4] = pcg & 255;
   msg[5] = CRCFast(msg, 9);
 
   //logger->logEvent("Data Message Available");
@@ -196,6 +202,30 @@ void ProcessSystemFast(){
 
   Serial.write(msg,6);
   Serial.flush();
+}
+
+void ProcessSystemDataLogger()
+{
+  static unsigned long prev_cycles = 0;
+  // static int_fast16_t prev_value_ecg = 0;
+  // static int_fast16_t prev_value_pcg = 0;
+  // int_fast16_t value_A9 = adc->adc1->analogRead(readPin_A9);
+  // int_fast16_t value_A1 = adc->adc0->analogRead(readPin_A1);
+  //ADC::Sync_result result;
+  //result = adc->readSynchronizedSingle();
+  unsigned long cycles = ARM_DWT_CYCCNT;
+  uint16_t ecg = adc->adc0->analogRead(readPin_A9);
+  uint16_t pcg = adc->adc0->analogRead(readPin_A1);
+  // uint16_t ecg = uint16_t(result.result_adc0);
+  // uint16_t pcg = uint16_t(result.result_adc1);
+  double data[3];
+  data[0] = cycles - prev_cycles;
+  data[1] = ecg;
+  data[2] = pcg;
+  csv.logDataEvent(data, 3);
+  prev_cycles = cycles;
+  //uint16_t value_A2 = adc->adc1->analogRead(readPin_A2);
+  //ecg_diff = value_A9 - prev_value_ecg;
 }
 
 void ReadADC(int_fast16_t &ecg_diff, uint_fast16_t &pcg_diff, time_t &sample_time){
@@ -209,11 +239,4 @@ void ReadADC(int_fast16_t &ecg_diff, uint_fast16_t &pcg_diff, time_t &sample_tim
   prev_value_ecg = value_A9;
   pcg_diff = value_A1 - prev_value_pcg;
   prev_value_pcg = value_A1;
-}
-
-void ButtonInterrupt(){
-  pwrToggle ^= 0x01;
-  #if DEBUG == 2
-  logger->logEvent("Forced Power Mode Change");
-  #endif
 }

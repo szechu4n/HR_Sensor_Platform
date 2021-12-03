@@ -9,6 +9,7 @@
 #include "errorCodes.h"
 #include "ErrorCheckLib.h"
 #include "SystemCommands.h"
+#include "csvwriter.h"
 #include "crc.h"
 #include "logger.h"
 
@@ -46,6 +47,6 @@ void WriteToSDCard();
 void ProcessSystem();
 void ProcessSystemFast();
 void ButtonInterrupt();
-
+void ProcessSystemDataLogger();
 
 #endif

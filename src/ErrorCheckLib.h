@@ -1,6 +1,8 @@
 #ifndef ERRORCHECK_H
 #define ERRORCHECK_H
 
+#include "main.h"
+
 typedef uint16_t GlobalErrorType;
 
 void ErrorSet(ErrorCode); // sets errors as they occur 
